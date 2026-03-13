@@ -1,5 +1,5 @@
 import express from "express";
-import { createShopItem, getShopItems, createSale } from "../controllers/shopController.js";
+import { createShopItem, getShopItems, createSale, listSales } from "../controllers/shopController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
 
@@ -21,6 +21,11 @@ router.post(
   "/sales",
   authorizeRoles("shopadmin", "canteen", "superadmin"),
   createSale
+);
+router.get(
+  "/sales",
+  authorizeRoles("shopadmin", "canteen", "superadmin", "admin", "accountant"),
+  listSales
 );
 
 export default router;

@@ -1,6 +1,7 @@
 import LeaveRequest from "../models/LeaveRequest.js";
 import Student from "../models/Student.js";
 import { notifyUser } from "../services/notificationService.js";
+import { parsePagination, parseSort, parseDateRange } from "../utils/queryUtils.js";
 
 // POST /api/leave
 export const createLeaveRequest = async (req, res, next) => {
@@ -18,8 +19,25 @@ export const createLeaveRequest = async (req, res, next) => {
 // GET /api/leave
 export const getLeaveRequests = async (req, res, next) => {
   try {
-    const leaves = await LeaveRequest.find().populate("student requestedBy reviewedBy");
-    res.json(leaves);
+    const filter = {
+      ...parseDateRange(req, "createdAt")
+    };
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.student) filter.student = req.query.student;
+
+    const { page, limit, skip } = parsePagination(req);
+    const sort = parseSort(req);
+
+    const [items, total] = await Promise.all([
+      LeaveRequest.find(filter)
+        .populate("student requestedBy reviewedBy")
+        .sort(sort)
+        .skip(skip)
+        .limit(limit),
+      LeaveRequest.countDocuments(filter)
+    ]);
+
+    res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     next(err);
   }

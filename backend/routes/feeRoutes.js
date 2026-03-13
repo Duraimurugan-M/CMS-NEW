@@ -9,6 +9,7 @@ import {
 } from "../controllers/feeController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
+import { validate } from "../middleware/validateMiddleware.js";
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.post(
   "/",
   authorizeRoles("admin", "superadmin", "accountant"),
   [body("name").notEmpty(), body("code").notEmpty()],
+  validate,
   createFeeHead
 );
 

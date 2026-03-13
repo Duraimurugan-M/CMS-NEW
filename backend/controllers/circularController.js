@@ -1,4 +1,5 @@
 import Circular from "../models/Circular.js";
+import { parsePagination, parseSort } from "../utils/queryUtils.js";
 
 // POST /api/circulars
 export const createCircular = async (req, res, next) => {
@@ -21,8 +22,16 @@ export const getCirculars = async (req, res, next) => {
     if (audience) {
       filter.audience = { $in: [audience, "all"] };
     }
-    const circulars = await Circular.find(filter).sort("-publishDate");
-    res.json(circulars);
+
+    const { page, limit, skip } = parsePagination(req);
+    const sort = parseSort(req, "-publishDate");
+
+    const [items, total] = await Promise.all([
+      Circular.find(filter).sort(sort).skip(skip).limit(limit),
+      Circular.countDocuments(filter)
+    ]);
+
+    res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     next(err);
   }

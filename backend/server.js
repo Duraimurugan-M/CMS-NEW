@@ -29,6 +29,9 @@ import canteenRoutes from "./routes/canteenRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import checkInRoutes from "./routes/checkInRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import settingRoutes from "./routes/settingRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+import reminderRoutes from "./routes/reminderRoutes.js";
 
 const app = express();
 
@@ -66,6 +69,9 @@ app.use("/api/canteen", canteenRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/checkin", checkInRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/settings", settingRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/reminders", reminderRoutes);
 
 // Error handler
 app.use(errorHandler);

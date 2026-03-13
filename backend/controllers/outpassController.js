@@ -1,6 +1,7 @@
 import OutpassRequest from "../models/OutpassRequest.js";
 import Student from "../models/Student.js";
 import { notifyUser } from "../services/notificationService.js";
+import { parsePagination, parseSort, parseDateRange } from "../utils/queryUtils.js";
 
 // POST /api/outpass
 export const createOutpassRequest = async (req, res, next) => {
@@ -18,8 +19,25 @@ export const createOutpassRequest = async (req, res, next) => {
 // GET /api/outpass
 export const getOutpassRequests = async (req, res, next) => {
   try {
-    const items = await OutpassRequest.find().populate("student requestedBy approvedBy");
-    res.json(items);
+    const filter = {
+      ...parseDateRange(req, "createdAt")
+    };
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.student) filter.student = req.query.student;
+
+    const { page, limit, skip } = parsePagination(req);
+    const sort = parseSort(req);
+
+    const [items, total] = await Promise.all([
+      OutpassRequest.find(filter)
+        .populate("student requestedBy approvedBy")
+        .sort(sort)
+        .skip(skip)
+        .limit(limit),
+      OutpassRequest.countDocuments(filter)
+    ]);
+
+    res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     next(err);
   }

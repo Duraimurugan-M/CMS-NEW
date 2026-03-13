@@ -3,7 +3,8 @@ import {
   getFeeReport,
   getInventoryReport,
   getExpenseReport,
-  getCanteenShopReport
+  getCanteenShopReport,
+  getLibraryReport
 } from "../controllers/reportController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
@@ -20,6 +21,7 @@ router.get(
   authorizeRoles("admin", "superadmin", "accountant"),
   getCanteenShopReport
 );
+router.get("/library", authorizeRoles("admin", "superadmin", "librarian"), getLibraryReport);
 
 export default router;
 

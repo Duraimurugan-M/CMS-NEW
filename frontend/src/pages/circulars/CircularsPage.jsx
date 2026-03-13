@@ -3,10 +3,20 @@ import api from "../../services/api";
 
 export default function CircularsPage() {
   const [circulars, setCirculars] = useState([]);
+  const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
 
   useEffect(() => {
-    api.get("/circulars").then((res) => setCirculars(res.data));
+    api.get("/circulars", { params: { page: 1, limit: 10 } }).then((res) => {
+      setCirculars(res.data.items);
+      setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+    });
   }, []);
+
+  const load = async (page) => {
+    const res = await api.get("/circulars", { params: { page, limit: 10 } });
+    setCirculars(res.data.items);
+    setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+  };
 
   return (
     <div className="space-y-4">
@@ -31,6 +41,27 @@ export default function CircularsPage() {
         {circulars.length === 0 && (
           <div className="p-4 text-xs text-slate-500">No circulars available.</div>
         )}
+      </div>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-slate-500">
+          Page {meta.page} of {meta.totalPages}
+        </p>
+        <div className="flex gap-2">
+          <button
+            className="text-xs px-3 py-1.5 rounded-md border border-slate-300 hover:bg-slate-100 disabled:opacity-50"
+            onClick={() => load(meta.page - 1)}
+            disabled={meta.page <= 1}
+          >
+            Prev
+          </button>
+          <button
+            className="text-xs px-3 py-1.5 rounded-md border border-slate-300 hover:bg-slate-100 disabled:opacity-50"
+            onClick={() => load(meta.page + 1)}
+            disabled={meta.page >= meta.totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

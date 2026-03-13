@@ -1,12 +1,23 @@
 import Notification from "../models/Notification.js";
+import { parsePagination, parseSort } from "../utils/queryUtils.js";
 
 // GET /api/notifications
 export const getMyNotifications = async (req, res, next) => {
   try {
-    const notifications = await Notification.find({ user: req.user._id })
-      .sort("-createdAt")
-      .limit(100);
-    res.json(notifications);
+    const filter = { user: req.user._id };
+    if (req.query.isRead !== undefined) {
+      filter.isRead = req.query.isRead === "true";
+    }
+
+    const { page, limit, skip } = parsePagination(req);
+    const sort = parseSort(req);
+
+    const [items, total] = await Promise.all([
+      Notification.find(filter).sort(sort).skip(skip).limit(limit),
+      Notification.countDocuments(filter)
+    ]);
+
+    res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     next(err);
   }

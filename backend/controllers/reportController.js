@@ -3,6 +3,8 @@ import Invoice from "../models/Invoice.js";
 import InventoryItem from "../models/InventoryItem.js";
 import Expense from "../models/Expense.js";
 import SalesTransaction from "../models/SalesTransaction.js";
+import Book from "../models/Book.js";
+import BookIssue from "../models/BookIssue.js";
 
 // GET /api/reports/fees
 export const getFeeReport = async (req, res, next) => {
@@ -84,6 +86,19 @@ export const getCanteenShopReport = async (req, res, next) => {
       .filter((s) => !s.isCanteen)
       .reduce((sum, s) => sum + s.totalAmount, 0);
     res.json({ totalCanteen, totalShop, sales });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/reports/library
+export const getLibraryReport = async (req, res, next) => {
+  try {
+    const totalBooks = await Book.countDocuments();
+    const activeIssues = await BookIssue.countDocuments({ returnDate: { $exists: false } });
+    const issues = await BookIssue.find();
+    const totalFines = issues.reduce((sum, i) => sum + (i.fineAmount || 0), 0);
+    res.json({ totalBooks, activeIssues, totalFines });
   } catch (err) {
     next(err);
   }

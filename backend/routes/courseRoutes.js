@@ -8,6 +8,7 @@ import {
 } from "../controllers/courseController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
+import { validate } from "../middleware/validateMiddleware.js";
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.post(
   "/",
   authorizeRoles("admin", "superadmin"),
   [body("name").notEmpty(), body("code").notEmpty()],
+  validate,
   createCourse
 );
 

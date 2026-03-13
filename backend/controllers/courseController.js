@@ -1,5 +1,6 @@
 import { validationResult } from "express-validator";
 import Course from "../models/Course.js";
+import { parsePagination, parseSort } from "../utils/queryUtils.js";
 
 // POST /api/courses
 export const createCourse = async (req, res, next) => {
@@ -18,8 +19,25 @@ export const createCourse = async (req, res, next) => {
 // GET /api/courses
 export const getCourses = async (req, res, next) => {
   try {
-    const courses = await Course.find();
-    res.json(courses);
+    const filter = {};
+    if (req.query.search) {
+      filter.$or = [
+        { name: new RegExp(String(req.query.search), "i") },
+        { code: new RegExp(String(req.query.search), "i") },
+        { department: new RegExp(String(req.query.search), "i") }
+      ];
+    }
+    if (req.query.isActive !== undefined) filter.isActive = req.query.isActive === "true";
+
+    const { page, limit, skip } = parsePagination(req);
+    const sort = parseSort(req);
+
+    const [items, total] = await Promise.all([
+      Course.find(filter).sort(sort).skip(skip).limit(limit),
+      Course.countDocuments(filter)
+    ]);
+
+    res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     next(err);
   }

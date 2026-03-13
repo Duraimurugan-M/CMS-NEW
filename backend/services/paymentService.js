@@ -1,5 +1,6 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import mongoose from "mongoose";
 import Payment from "../models/Payment.js";
 import Invoice from "../models/Invoice.js";
 import { addLedgerEntry } from "./ledgerService.js";
@@ -49,58 +50,75 @@ export const verifyRazorpaySignature = ({ orderId, paymentId, signature }) => {
 };
 
 export const markPaymentSuccess = async ({ paymentId, razorpayPaymentId, razorpaySignature }) => {
-  const payment = await Payment.findById(paymentId).populate("student invoice");
-  if (!payment) throw new Error("Payment not found");
+  const session = await mongoose.startSession();
+  try {
+    let updatedPayment;
 
-  if (
-    !verifyRazorpaySignature({
-      orderId: payment.razorpayOrderId,
-      paymentId: razorpayPaymentId,
-      signature: razorpaySignature
-    })
-  ) {
-    throw new Error("Invalid Razorpay signature");
-  }
+    await session.withTransaction(async () => {
+      const payment = await Payment.findById(paymentId).session(session).populate("student invoice");
+      if (!payment) throw new Error("Payment not found");
 
-  payment.status = "success";
-  payment.razorpayPaymentId = razorpayPaymentId;
-  payment.razorpaySignature = razorpaySignature;
-  await payment.save();
+      if (
+        !verifyRazorpaySignature({
+          orderId: payment.razorpayOrderId,
+          paymentId: razorpayPaymentId,
+          signature: razorpaySignature
+        })
+      ) {
+        throw new Error("Invalid Razorpay signature");
+      }
 
-  if (payment.invoice) {
-    const invoice = await Invoice.findById(payment.invoice._id);
-    invoice.paidAmount += payment.amount;
-    if (invoice.paidAmount >= invoice.totalAmount) {
-      invoice.status = "paid";
-    } else if (invoice.paidAmount > 0) {
-      invoice.status = "partially_paid";
-    }
-    await invoice.save();
-  }
+      // Idempotency guard
+      if (payment.status === "success") {
+        updatedPayment = payment;
+        return;
+      }
 
-  // Ledger credit
-  await addLedgerEntry({
-    studentId: payment.student._id,
-    type: "credit",
-    amount: payment.amount,
-    description: `Payment received via online gateway`,
-    invoiceId: payment.invoice?._id,
-    paymentId: payment._id
-  });
+      payment.status = "success";
+      payment.razorpayPaymentId = razorpayPaymentId;
+      payment.razorpaySignature = razorpaySignature;
+      await payment.save({ session });
 
-  // Notification to student (if user linked)
-  const student = await Student.findById(payment.student._id).populate("user");
-  if (student?.user) {
-    await notifyUser({
-      user: student.user,
-      student: student._id,
-      type: "payment_confirmation",
-      title: "Fee payment received",
-      message: `We have received a payment of ₹${payment.amount}.`,
-      channels: ["in_app", "email"]
+      if (payment.invoice) {
+        const invoice = await Invoice.findById(payment.invoice._id).session(session);
+        invoice.paidAmount += payment.amount;
+        if (invoice.paidAmount >= invoice.totalAmount) {
+          invoice.status = "paid";
+        } else if (invoice.paidAmount > 0) {
+          invoice.status = "partially_paid";
+        }
+        await invoice.save({ session });
+      }
+
+      await addLedgerEntry({
+        studentId: payment.student._id,
+        type: "credit",
+        amount: payment.amount,
+        description: "Payment received via online gateway",
+        invoiceId: payment.invoice?._id,
+        paymentId: payment._id,
+        session
+      });
+
+      updatedPayment = payment;
     });
-  }
 
-  return payment;
+    // Notification outside transaction (non-critical side-effect)
+    const student = await Student.findById(updatedPayment.student._id).populate("user");
+    if (student?.user) {
+      await notifyUser({
+        user: student.user,
+        student: student._id,
+        type: "payment_confirmation",
+        title: "Fee payment received",
+        message: `We have received a payment of ₹${updatedPayment.amount}.`,
+        channels: ["in_app", "email"]
+      });
+    }
+
+    return updatedPayment;
+  } finally {
+    session.endSession();
+  }
 };
 

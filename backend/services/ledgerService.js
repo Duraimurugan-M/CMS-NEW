@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
 import Ledger from "../models/Ledger.js";
 
-export const ensureLedgerForStudent = async (studentId) => {
-  let ledger = await Ledger.findOne({ student: studentId });
+export const ensureLedgerForStudent = async (studentId, { session } = {}) => {
+  let ledger = await Ledger.findOne({ student: studentId }).session(session || null);
   if (!ledger) {
-    ledger = await Ledger.create({ student: studentId, entries: [] });
+    const created = await Ledger.create([{ student: studentId, entries: [] }], { session });
+    ledger = created[0];
   }
   return ledger;
 };
@@ -15,9 +16,10 @@ export const addLedgerEntry = async ({
   amount,
   description,
   invoiceId,
-  paymentId
+  paymentId,
+  session
 }) => {
-  const ledger = await ensureLedgerForStudent(studentId);
+  const ledger = await ensureLedgerForStudent(studentId, { session });
   const lastEntry = ledger.entries[ledger.entries.length - 1];
   const prevBalance = lastEntry ? lastEntry.balanceAfter : 0;
   const newBalance = type === "debit" ? prevBalance + amount : prevBalance - amount;
@@ -32,7 +34,7 @@ export const addLedgerEntry = async ({
     balanceAfter: newBalance
   });
 
-  await ledger.save();
+  await ledger.save({ session });
   return ledger;
 };
 

@@ -1,66 +1,110 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuthStore } from "../../store/authStore";
+import Table from "../../components/tables/Table.jsx";
+import Pagination from "../../components/utils/Pagination.jsx";
+import DateRange from "../../components/utils/DateRange.jsx";
+import SearchBar from "../../components/utils/SearchBar.jsx";
+import jsPDF from "jspdf";
 
 export default function PaymentsPage() {
   const { user } = useAuthStore();
   const [payments, setPayments] = useState([]);
+  const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
+  const [student, setStudent] = useState("");
+  const [dateRange, setDateRange] = useState({ from: "", to: "" });
 
   useEffect(() => {
-    // For demo, superadmin/admin can view all payments by not filtering; in real app you'd add admin endpoint
     if (!user) return;
-    if (user.role === "student") {
-      // needs linkage to studentId; placeholder
-    }
-    // Simple: get all by hitting reports/fees and using payments list
-    api
-      .get("/reports/fees")
-      .then((res) => setPayments(res.data.payments || []))
-      .catch(() => {});
+    load({ page: 1 });
   }, [user]);
+
+  const load = async ({ page = 1 } = {}) => {
+    if (!user) return;
+    // Admin/Accountant view: system payments list endpoint
+    if (["admin", "superadmin", "accountant"].includes(user.role)) {
+      const res = await api.get("/payments", {
+        params: {
+          page,
+          limit: 10,
+          student: student || undefined,
+          from: dateRange.from || undefined,
+          to: dateRange.to || undefined
+        }
+      });
+      setPayments(res.data.items);
+      setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+      return;
+    }
+
+    // Student/parent view: for now show empty until user-student linkage UI is completed
+    setPayments([]);
+    setMeta({ page: 1, totalPages: 1 });
+  };
+
+  const downloadReceipt = (p) => {
+    const doc = new jsPDF();
+    doc.text("Payment Receipt", 10, 10);
+    doc.text(`Amount: ₹${p.amount}`, 10, 20);
+    doc.text(`Status: ${p.status}`, 10, 30);
+    doc.text(`Method: ${p.method}`, 10, 40);
+    doc.text(`Date: ${new Date(p.createdAt).toLocaleString()}`, 10, 50);
+    doc.text(`Gateway ID: ${p.razorpayPaymentId || "-"}`, 10, 60);
+    doc.save(`receipt-${p._id}.pdf`);
+  };
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Payments</h1>
-        <p className="text-xs text-slate-500">
-          View payment history and online payment confirmations.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-900">Payments</h1>
+          <p className="text-xs text-slate-500">View payment history and download receipts.</p>
+        </div>
+
+        {["admin", "superadmin", "accountant"].includes(user?.role) && (
+          <div className="flex items-center gap-3">
+            <SearchBar
+              value={student}
+              onChange={setStudent}
+              onSearch={() => load({ page: 1 })}
+              placeholder="Filter by studentId (optional)"
+            />
+            <DateRange from={dateRange.from} to={dateRange.to} onChange={setDateRange} />
+            <button
+              onClick={() => load({ page: 1 })}
+              className="px-3 py-1.5 text-sm rounded-md bg-primary-600 text-white"
+            >
+              Apply
+            </button>
+          </div>
+        )}
       </div>
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-3 py-2 text-left">Amount</th>
-              <th className="px-3 py-2 text-left">Method</th>
-              <th className="px-3 py-2 text-left">Status</th>
-              <th className="px-3 py-2 text-left">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments.map((p) => (
-              <tr key={p._id} className="border-b last:border-0 border-slate-100">
-                <td className="px-3 py-2">₹ {p.amount}</td>
-                <td className="px-3 py-2">{p.method}</td>
-                <td className="px-3 py-2">{p.status}</td>
-                <td className="px-3 py-2">
-                  {new Date(p.createdAt).toLocaleString("en-IN", {
-                    dateStyle: "short",
-                    timeStyle: "short"
-                  })}
-                </td>
-              </tr>
-            ))}
-            {payments.length === 0 && (
-              <tr>
-                <td className="px-3 py-4 text-center text-xs text-slate-500" colSpan={4}>
-                  No payments yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+
+      <Table
+        columns={[
+          { key: "createdAt", header: "Date", render: (p) => new Date(p.createdAt).toLocaleString() },
+          { key: "student", header: "Student", render: (p) => p.student?.regNo || p.student?._id || "-" },
+          { key: "amount", header: "Amount", render: (p) => `₹ ${p.amount}` },
+          { key: "method", header: "Method" },
+          { key: "status", header: "Status" },
+          {
+            key: "receipt",
+            header: "Receipt",
+            render: (p) => (
+              <button
+                onClick={() => downloadReceipt(p)}
+                className="text-xs px-2 py-1 rounded-md border border-slate-300 hover:bg-slate-100"
+              >
+                PDF
+              </button>
+            )
+          }
+        ]}
+        data={payments}
+        emptyText="No payments."
+      />
+
+      <Pagination page={meta.page} totalPages={meta.totalPages} onPageChange={(p) => load({ page: p })} />
     </div>
   );
 }

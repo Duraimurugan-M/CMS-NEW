@@ -4,6 +4,7 @@ import Layout from "./components/layout/Layout.jsx";
 import AuthLogin from "./pages/AuthLogin.jsx";
 import DashboardHome from "./pages/dashboard/DashboardHome.jsx";
 import StudentsList from "./pages/students/StudentsList.jsx";
+import StudentProfile from "./pages/students/StudentProfile.jsx";
 import FeesPage from "./pages/fees/FeesPage.jsx";
 import PaymentsPage from "./pages/payments/PaymentsPage.jsx";
 import InventoryPage from "./pages/inventory/InventoryPage.jsx";
@@ -11,6 +12,8 @@ import LibraryPage from "./pages/library/LibraryPage.jsx";
 import ReportsPage from "./pages/reports/ReportsPage.jsx";
 import CircularsPage from "./pages/circulars/CircularsPage.jsx";
 import NotificationsPage from "./pages/notifications/NotificationsPage.jsx";
+import CoursesPage from "./pages/courses/CoursesPage.jsx";
+import SettingsPage from "./pages/settings/SettingsPage.jsx";
 
 function PrivateRoute({ children }) {
   const { token } = useAuthStore();
@@ -55,11 +58,31 @@ export default function App() {
         }
       />
       <Route
+        path="/students/:id"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <StudentProfile />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/fees"
         element={
           <PrivateRoute>
             <Layout>
               <FeesPage />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/courses"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <CoursesPage />
             </Layout>
           </PrivateRoute>
         }
@@ -120,6 +143,16 @@ export default function App() {
           <PrivateRoute>
             <Layout>
               <NotificationsPage />
+            </Layout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <Layout>
+              <SettingsPage />
             </Layout>
           </PrivateRoute>
         }

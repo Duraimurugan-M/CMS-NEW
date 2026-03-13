@@ -1,52 +1,47 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import Table from "../../components/tables/Table.jsx";
+import Pagination from "../../components/utils/Pagination.jsx";
+import SearchBar from "../../components/utils/SearchBar.jsx";
 
 export default function InventoryPage() {
   const [items, setItems] = useState([]);
+  const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    api.get("/inventory").then((res) => setItems(res.data));
+    load();
   }, []);
+
+  const load = async ({ page = 1 } = {}) => {
+    const res = await api.get("/inventory", { params: { page, limit: 10, search } });
+    setItems(res.data.items);
+    setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+  };
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-900">Inventory</h1>
-        <p className="text-xs text-slate-500">
-          Track academic, hostel, and general stock inventory.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-900">Inventory</h1>
+          <p className="text-xs text-slate-500">
+            Track academic, hostel, and general stock inventory.
+          </p>
+        </div>
+        <SearchBar value={search} onChange={setSearch} onSearch={() => load({ page: 1 })} />
       </div>
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-3 py-2 text-left">Name</th>
-              <th className="px-3 py-2 text-left">Category</th>
-              <th className="px-3 py-2 text-left">Qty</th>
-              <th className="px-3 py-2 text-left">Location</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((i) => (
-              <tr key={i._id} className="border-b last:border-0 border-slate-100">
-                <td className="px-3 py-2">{i.name}</td>
-                <td className="px-3 py-2">{i.category}</td>
-                <td className="px-3 py-2">
-                  {i.quantity} {i.unit}
-                </td>
-                <td className="px-3 py-2">{i.location || "-"}</td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr>
-                <td className="px-3 py-4 text-center text-xs text-slate-500" colSpan={4}>
-                  No inventory items found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+
+      <Table
+        columns={[
+          { key: "name", header: "Name" },
+          { key: "category", header: "Category" },
+          { key: "qty", header: "Qty", render: (i) => `${i.quantity} ${i.unit}` },
+          { key: "location", header: "Location", render: (i) => i.location || "-" }
+        ]}
+        data={items}
+      />
+
+      <Pagination page={meta.page} totalPages={meta.totalPages} onPageChange={(p) => load({ page: p })} />
     </div>
   );
 }

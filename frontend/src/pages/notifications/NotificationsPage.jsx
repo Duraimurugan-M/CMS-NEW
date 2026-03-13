@@ -3,10 +3,12 @@ import api from "../../services/api";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
+  const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
 
-  const load = async () => {
-    const res = await api.get("/notifications");
-    setNotifications(res.data);
+  const load = async ({ page = 1 } = {}) => {
+    const res = await api.get("/notifications", { params: { page, limit: 20 } });
+    setNotifications(res.data.items);
+    setMeta({ page: res.data.page, totalPages: res.data.totalPages });
   };
 
   useEffect(() => {
@@ -15,7 +17,7 @@ export default function NotificationsPage() {
 
   const markRead = async (id) => {
     await api.post(`/notifications/${id}/read`);
-    load();
+    load({ page: meta.page });
   };
 
   return (
@@ -52,6 +54,29 @@ export default function NotificationsPage() {
         {notifications.length === 0 && (
           <div className="p-4 text-xs text-slate-500">No notifications yet.</div>
         )}
+      </div>
+      <div className="pt-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-slate-500">
+            Page {meta.page} of {meta.totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="text-xs px-3 py-1.5 rounded-md border border-slate-300 hover:bg-slate-100 disabled:opacity-50"
+              onClick={() => load({ page: meta.page - 1 })}
+              disabled={meta.page <= 1}
+            >
+              Prev
+            </button>
+            <button
+              className="text-xs px-3 py-1.5 rounded-md border border-slate-300 hover:bg-slate-100 disabled:opacity-50"
+              onClick={() => load({ page: meta.page + 1 })}
+              disabled={meta.page >= meta.totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

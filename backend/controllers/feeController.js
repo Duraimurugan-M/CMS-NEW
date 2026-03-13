@@ -5,6 +5,7 @@ import { addLedgerEntry } from "../services/ledgerService.js";
 import dayjs from "dayjs";
 import { notifyUser } from "../services/notificationService.js";
 import Student from "../models/Student.js";
+import mongoose from "mongoose";
 
 // CRUD for fee heads
 
@@ -74,25 +75,39 @@ export const createInvoice = async (req, res, next) => {
       Math.random() * 1000
     )}`;
 
-    const invoice = await Invoice.create({
-      student,
-      invoiceNo,
-      issueDate,
-      dueDate,
-      lines,
-      totalAmount,
-      paidAmount: 0,
-      status: "unpaid",
-      isAdvance
+    const session = await mongoose.startSession();
+    let createdInvoice;
+
+    await session.withTransaction(async () => {
+      const created = await Invoice.create(
+        [
+          {
+            student,
+            invoiceNo,
+            issueDate,
+            dueDate,
+            lines,
+            totalAmount,
+            paidAmount: 0,
+            status: "unpaid",
+            isAdvance
+          }
+        ],
+        { session }
+      );
+      createdInvoice = created[0];
+
+      await addLedgerEntry({
+        studentId: student,
+        type: "debit",
+        amount: totalAmount,
+        description: isAdvance ? "Advance fee billed" : "Fee billed",
+        invoiceId: createdInvoice._id,
+        session
+      });
     });
 
-    await addLedgerEntry({
-      studentId: student,
-      type: "debit",
-      amount: totalAmount,
-      description: isAdvance ? "Advance fee billed" : "Fee billed",
-      invoiceId: invoice._id
-    });
+    session.endSession();
 
     // Optional: immediate due-date reminder email if dueDate is near
     if (dueDate) {
@@ -111,7 +126,7 @@ export const createInvoice = async (req, res, next) => {
       }
     }
 
-    res.status(201).json(invoice);
+    res.status(201).json(createdInvoice);
   } catch (err) {
     next(err);
   }
