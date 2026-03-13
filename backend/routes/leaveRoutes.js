@@ -17,7 +17,7 @@ router.post(
   "/",
   authorizeRoles("parent", "student"),
   [
-    body("student").isMongoId(),
+    body("student").optional().isMongoId(),
     body("fromDate").isISO8601(),
     body("toDate").isISO8601(),
     body("reason").notEmpty()

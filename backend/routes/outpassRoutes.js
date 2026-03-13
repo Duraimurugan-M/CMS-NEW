@@ -16,11 +16,11 @@ router.use(protect);
 router.post(
   "/",
   authorizeRoles("parent", "student"),
-  [body("student").isMongoId(), body("exitDateTime").isISO8601(), body("reason").notEmpty()],
+  [body("student").optional().isMongoId(), body("exitDateTime").isISO8601(), body("reason").notEmpty()],
   validate,
   createOutpassRequest
 );
-router.get("/", authorizeRoles("admin", "superadmin", "staff"), getOutpassRequests);
+router.get("/", authorizeRoles("admin", "superadmin", "staff", "parent", "student"), getOutpassRequests);
 router.put(
   "/:id",
   authorizeRoles("admin", "superadmin", "staff"),

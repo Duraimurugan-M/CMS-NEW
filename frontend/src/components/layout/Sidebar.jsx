@@ -16,6 +16,7 @@ const menus = {
     { to: "/outpass", label: "Outpass" },
     { to: "/checkin", label: "Check-In" },
     { to: "/reports", label: "Reports" },
+    { to: "/users", label: "Users" },
     { to: "/circulars", label: "Circulars" },
     { to: "/notifications", label: "Notifications" },
     { to: "/settings", label: "Settings" }
@@ -89,17 +90,21 @@ const menus = {
   ]
 };
 
-export default function Sidebar() {
+export default function Sidebar({ open = true, onNavigate = null }) {
   const { user } = useAuthStore();
   const items = user?.role ? menus[user.role] || menus.student : menus.student;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 h-screen sticky top-0">
+    <aside
+      className={`fixed lg:sticky top-0 left-0 z-40 w-64 bg-white border-r border-slate-200 h-screen transform transition-transform duration-200 ${
+        open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      }`}
+    >
       <div className="p-4 border-b border-slate-200">
         <h1 className="text-lg font-semibold text-primary-600">College CMS</h1>
         {user && (
           <p className="text-xs text-slate-500 mt-1">
-            {user.name} · {user.role}
+            {user.name} - {user.role}
           </p>
         )}
       </div>
@@ -108,6 +113,7 @@ export default function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={() => onNavigate?.()}
             className={({ isActive }) =>
               `block px-3 py-2 rounded-md text-sm ${
                 isActive

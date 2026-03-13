@@ -21,6 +21,7 @@ import OutpassPage from "./pages/outpass/OutpassPage.jsx";
 import CheckInPage from "./pages/checkin/CheckInPage.jsx";
 import ExpensesPage from "./pages/expenses/ExpensesPage.jsx";
 import ShopPage from "./pages/shop/ShopPage.jsx";
+import UsersPage from "./pages/users/UsersPage.jsx";
 
 function PrivateRoute({ children }) {
   const { token } = useAuthStore();
@@ -64,8 +65,8 @@ export default function App() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<ProtectedPage><DashboardHome /></ProtectedPage>} />
 
-      <Route path="/students" element={<ProtectedPage roles={["admin", "superadmin", "accountant", "staff"]}><StudentsList /></ProtectedPage>} />
-      <Route path="/students/:id" element={<ProtectedPage roles={["admin", "superadmin", "accountant", "staff"]}><StudentProfile /></ProtectedPage>} />
+      <Route path="/students" element={<ProtectedPage roles={["admin", "superadmin", "accountant"]}><StudentsList /></ProtectedPage>} />
+      <Route path="/students/:id" element={<ProtectedPage roles={["admin", "superadmin", "accountant"]}><StudentProfile /></ProtectedPage>} />
       <Route path="/courses" element={<ProtectedPage roles={["admin", "superadmin"]}><CoursesPage /></ProtectedPage>} />
 
       <Route path="/fees" element={<ProtectedPage roles={["admin", "superadmin", "accountant"]}><FeesPage /></ProtectedPage>} />
@@ -81,6 +82,7 @@ export default function App() {
       <Route path="/checkin" element={<ProtectedPage roles={["staff", "admin", "superadmin"]}><CheckInPage /></ProtectedPage>} />
 
       <Route path="/reports" element={<ProtectedPage roles={["admin", "superadmin", "accountant", "librarian"]}><ReportsPage /></ProtectedPage>} />
+      <Route path="/users" element={<ProtectedPage roles={["superadmin"]}><UsersPage /></ProtectedPage>} />
       <Route path="/circulars" element={<ProtectedPage><CircularsPage /></ProtectedPage>} />
       <Route path="/notifications" element={<ProtectedPage><NotificationsPage /></ProtectedPage>} />
       <Route path="/settings" element={<ProtectedPage roles={["admin", "superadmin"]}><SettingsPage /></ProtectedPage>} />

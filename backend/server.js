@@ -32,6 +32,9 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import reminderRoutes from "./routes/reminderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import { startReminderScheduler } from "./services/reminderService.js";
+import parentRoutes from "./routes/parentRoutes.js";
 
 const app = express();
 
@@ -72,6 +75,8 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/reminders", reminderRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/parents", parentRoutes);
 
 // Error handler
 app.use(errorHandler);
@@ -80,6 +85,7 @@ const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   await connectDB();
+  startReminderScheduler();
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

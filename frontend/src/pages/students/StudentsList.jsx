@@ -8,8 +8,10 @@ import Input from "../../components/forms/Input.jsx";
 import Select from "../../components/forms/Select.jsx";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../../store/authStore";
 
 export default function StudentsList() {
+  const { user } = useAuthStore();
   const [students, setStudents] = useState([]);
   const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
   const [search, setSearch] = useState("");
@@ -56,13 +58,17 @@ export default function StudentsList() {
   const onSubmit = async (data) => {
     const payload = { ...data };
     if (!payload.course) delete payload.course;
-    if (editing) {
-      await api.put(`/students/${editing._id}`, payload);
-    } else {
-      await api.post("/students", payload);
+    try {
+      if (editing) {
+        await api.put(`/students/${editing._id}`, payload);
+      } else {
+        await api.post("/students", payload);
+      }
+      setOpen(false);
+      load({ page: meta.page });
+    } catch (err) {
+      alert(err.response?.data?.message || "Unable to save student");
     }
-    setOpen(false);
-    load({ page: meta.page });
   };
 
   return (
@@ -81,12 +87,14 @@ export default function StudentsList() {
             onSearch={() => load({ page: 1 })}
             placeholder="Search by name or Reg No"
           />
-          <button
-            onClick={openCreate}
-            className="px-3 py-1.5 text-sm rounded-md bg-emerald-600 text-white"
-          >
-            Add Student
-          </button>
+          {["admin", "superadmin"].includes(user?.role) && (
+            <button
+              onClick={openCreate}
+              className="px-3 py-1.5 text-sm rounded-md bg-emerald-600 text-white"
+            >
+              Add Student
+            </button>
+          )}
         </div>
       </div>
 
@@ -115,14 +123,17 @@ export default function StudentsList() {
           {
             key: "actions",
             header: "Actions",
-            render: (s) => (
-              <button
-                onClick={() => openEdit(s)}
-                className="text-xs px-2 py-1 rounded-md border border-slate-300 hover:bg-slate-100"
-              >
-                Edit
-              </button>
-            )
+            render: (s) =>
+              ["admin", "superadmin"].includes(user?.role) ? (
+                <button
+                  onClick={() => openEdit(s)}
+                  className="text-xs px-2 py-1 rounded-md border border-slate-300 hover:bg-slate-100"
+                >
+                  Edit
+                </button>
+              ) : (
+                "-"
+              )
           }
         ]}
         data={students}

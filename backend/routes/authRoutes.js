@@ -1,6 +1,12 @@
 import express from "express";
 import { body } from "express-validator";
-import { bootstrapSuperadmin, login, getProfile, logout } from "../controllers/authController.js";
+import {
+  bootstrapSuperadmin,
+  login,
+  refresh,
+  getProfile,
+  logout
+} from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -12,6 +18,7 @@ router.post(
 );
 
 router.post("/login", [body("password").notEmpty()], login);
+router.post("/refresh", [body("refreshToken").notEmpty()], refresh);
 
 router.get("/profile", protect, getProfile);
 router.post("/logout", protect, logout);

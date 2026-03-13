@@ -20,19 +20,28 @@ export default function LeavePage() {
   const canCreate = ["parent", "student"].includes(user?.role);
 
   const load = async ({ page = 1 } = {}) => {
-    const res = await api.get("/leave", { params: { page, limit: 10 } });
-    setItems(res.data.items);
-    setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+    try {
+      const res = await api.get("/leave", { params: { page, limit: 10 } });
+      setItems(res.data.items);
+      setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+    } catch (_) {
+      setItems([]);
+      setMeta({ page: 1, totalPages: 1 });
+    }
   };
 
   useEffect(() => {
     load();
-    api.get("/students", { params: { page: 1, limit: 100 } }).then((res) => setStudents(res.data.items));
-  }, []);
+    if (isReviewRole) {
+      api.get("/students", { params: { page: 1, limit: 100 } }).then((res) => setStudents(res.data.items)).catch(() => {});
+    }
+  }, [isReviewRole]);
 
   const onSubmit = async (data) => {
     try {
-      await api.post("/leave", data);
+      const payload = { ...data };
+      if (!isReviewRole) delete payload.student;
+      await api.post("/leave", payload);
       setOpen(false);
       reset();
       load({ page: 1 });
@@ -42,13 +51,17 @@ export default function LeavePage() {
   };
 
   const updateStatus = async (id, status) => {
-    await api.put(`/leave/${id}`, { status });
-    load({ page: meta.page });
+    try {
+      await api.put(`/leave/${id}`, { status });
+      load({ page: meta.page });
+    } catch (err) {
+      alert(err.response?.data?.message || "Unable to update leave request");
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold text-slate-900">Leave Management</h1>
           <p className="text-xs text-slate-500">Submit and review leave requests.</p>
@@ -95,14 +108,16 @@ export default function LeavePage() {
         }
       >
         <form id="leave-form" onSubmit={handleSubmit(onSubmit)}>
-          <Select label="Student" {...register("student", { required: true })}>
-            <option value="">-- select --</option>
-            {students.map((s) => (
-              <option key={s._id} value={s._id}>
-                {s.regNo} - {s.firstName}
-              </option>
-            ))}
-          </Select>
+          {isReviewRole && (
+            <Select label="Student" {...register("student", { required: true })}>
+              <option value="">-- select --</option>
+              {students.map((s) => (
+                <option key={s._id} value={s._id}>
+                  {s.regNo} - {s.firstName}
+                </option>
+              ))}
+            </Select>
+          )}
           <Input label="From Date" type="date" {...register("fromDate", { required: true })} />
           <Input label="To Date" type="date" {...register("toDate", { required: true })} />
           <Input label="Reason" {...register("reason", { required: true })} />

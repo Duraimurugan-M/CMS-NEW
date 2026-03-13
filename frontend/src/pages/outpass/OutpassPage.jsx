@@ -17,40 +17,60 @@ export default function OutpassPage() {
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
 
   const isReviewRole = ["admin", "superadmin", "staff"].includes(user?.role);
+  const canCreate = ["parent", "student"].includes(user?.role);
 
   const load = async ({ page = 1 } = {}) => {
-    const res = await api.get("/outpass", { params: { page, limit: 10 } });
-    setItems(res.data.items);
-    setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+    try {
+      const res = await api.get("/outpass", { params: { page, limit: 10 } });
+      setItems(res.data.items);
+      setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+    } catch (_) {
+      setItems([]);
+      setMeta({ page: 1, totalPages: 1 });
+    }
   };
 
   useEffect(() => {
     load();
-    api.get("/students", { params: { page: 1, limit: 100 } }).then((res) => setStudents(res.data.items));
-  }, []);
+    if (isReviewRole) {
+      api.get("/students", { params: { page: 1, limit: 100 } }).then((res) => setStudents(res.data.items)).catch(() => {});
+    }
+  }, [isReviewRole]);
 
   const onSubmit = async (data) => {
-    await api.post("/outpass", data);
-    setOpen(false);
-    reset();
-    load({ page: 1 });
+    try {
+      const payload = { ...data };
+      if (!isReviewRole) delete payload.student;
+      await api.post("/outpass", payload);
+      setOpen(false);
+      reset();
+      load({ page: 1 });
+    } catch (err) {
+      alert(err.response?.data?.message || "Unable to submit outpass request");
+    }
   };
 
   const updateStatus = async (id, status) => {
-    await api.put(`/outpass/${id}`, { status });
-    load({ page: meta.page });
+    try {
+      await api.put(`/outpass/${id}`, { status });
+      load({ page: meta.page });
+    } catch (err) {
+      alert(err.response?.data?.message || "Unable to update outpass request");
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold text-slate-900">Outpass Management</h1>
           <p className="text-xs text-slate-500">Manage student outing approvals and completion.</p>
         </div>
-        <button onClick={() => setOpen(true)} className="px-3 py-1.5 text-sm rounded-md bg-primary-600 text-white">
-          New Outpass
-        </button>
+        {canCreate && (
+          <button onClick={() => setOpen(true)} className="px-3 py-1.5 text-sm rounded-md bg-primary-600 text-white">
+            New Outpass
+          </button>
+        )}
       </div>
 
       <Table
@@ -89,14 +109,16 @@ export default function OutpassPage() {
         }
       >
         <form id="outpass-form" onSubmit={handleSubmit(onSubmit)}>
-          <Select label="Student" {...register("student", { required: true })}>
-            <option value="">-- select --</option>
-            {students.map((s) => (
-              <option key={s._id} value={s._id}>
-                {s.regNo} - {s.firstName}
-              </option>
-            ))}
-          </Select>
+          {isReviewRole && (
+            <Select label="Student" {...register("student", { required: true })}>
+              <option value="">-- select --</option>
+              {students.map((s) => (
+                <option key={s._id} value={s._id}>
+                  {s.regNo} - {s.firstName}
+                </option>
+              ))}
+            </Select>
+          )}
           <Input label="Exit Date & Time" type="datetime-local" {...register("exitDateTime", { required: true })} />
           <Input label="Expected Return Date & Time" type="datetime-local" {...register("expectedReturnDateTime")} />
           <Input label="Reason" {...register("reason", { required: true })} />

@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../services/api";
 import Table from "../../components/tables/Table.jsx";
+import { useAuthStore } from "../../store/authStore";
 
 export default function StudentProfile() {
   const { id } = useParams();
+  const { user } = useAuthStore();
   const [student, setStudent] = useState(null);
   const [ledger, setLedger] = useState(null);
   const [invoices, setInvoices] = useState([]);
@@ -12,11 +14,13 @@ export default function StudentProfile() {
   const [tab, setTab] = useState("ledger");
 
   useEffect(() => {
-    api.get(`/students/${id}`).then((res) => setStudent(res.data));
-    api.get(`/ledger/${id}`).then((res) => setLedger(res.data));
-    api.get(`/invoices/student/${id}`, { params: { page: 1, limit: 20 } }).then((res) => setInvoices(res.data.items));
-    api.get(`/payments/student/${id}`, { params: { page: 1, limit: 20 } }).then((res) => setPayments(res.data.items));
-  }, [id]);
+    api.get(`/students/${id}`).then((res) => setStudent(res.data)).catch(() => {});
+    if (["admin", "superadmin", "accountant"].includes(user?.role)) {
+      api.get(`/ledger/${id}`).then((res) => setLedger(res.data)).catch(() => setLedger({ entries: [] }));
+      api.get(`/invoices/student/${id}`, { params: { page: 1, limit: 20 } }).then((res) => setInvoices(res.data.items)).catch(() => setInvoices([]));
+    }
+    api.get(`/payments/student/${id}`, { params: { page: 1, limit: 20 } }).then((res) => setPayments(res.data.items)).catch(() => setPayments([]));
+  }, [id, user?.role]);
 
   const balance = useMemo(() => {
     const last = ledger?.entries?.[ledger.entries.length - 1];

@@ -17,7 +17,11 @@ export default function AuthLogin() {
   const onSubmit = async (data) => {
     try {
       const res = await api.post("/auth/login", data);
-      setAuth({ user: res.data.user, token: res.data.token });
+      setAuth({
+        user: res.data.user,
+        token: res.data.token,
+        refreshToken: res.data.refreshToken
+      });
       navigate("/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
