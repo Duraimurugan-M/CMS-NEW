@@ -65,8 +65,8 @@ export default function App() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<ProtectedPage><DashboardHome /></ProtectedPage>} />
 
-      <Route path="/students" element={<ProtectedPage roles={["admin", "superadmin", "accountant"]}><StudentsList /></ProtectedPage>} />
-      <Route path="/students/:id" element={<ProtectedPage roles={["admin", "superadmin", "accountant"]}><StudentProfile /></ProtectedPage>} />
+      <Route path="/students" element={<ProtectedPage roles={["admin", "superadmin", "accountant", "staff"]}><StudentsList /></ProtectedPage>} />
+      <Route path="/students/:id" element={<ProtectedPage roles={["admin", "superadmin", "accountant", "staff"]}><StudentProfile /></ProtectedPage>} />
       <Route path="/courses" element={<ProtectedPage roles={["admin", "superadmin"]}><CoursesPage /></ProtectedPage>} />
 
       <Route path="/fees" element={<ProtectedPage roles={["admin", "superadmin", "accountant"]}><FeesPage /></ProtectedPage>} />
