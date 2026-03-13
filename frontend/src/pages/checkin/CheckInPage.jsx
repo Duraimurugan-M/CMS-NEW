@@ -51,7 +51,7 @@ export default function CheckInPage() {
         <Select label="Student" value={selectedStudent} onChange={(e) => { setSelectedStudent(e.target.value); loadLogs(e.target.value); }}>
           {students.map((s) => (
             <option key={s._id} value={s._id}>
-              {s.regNo} - {s.firstName} {s.lastName || ""}
+              {s.regNumber} - {s.firstName} {s.lastName || ""}
             </option>
           ))}
         </Select>
@@ -82,7 +82,7 @@ export default function CheckInPage() {
             <option value="">-- select --</option>
             {students.map((s) => (
               <option key={s._id} value={s._id}>
-                {s.regNo} - {s.firstName}
+                {s.regNumber} - {s.firstName}
               </option>
             ))}
           </Select>

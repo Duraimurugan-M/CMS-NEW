@@ -119,7 +119,7 @@ export default function ShopPage() {
         <Table
           columns={[
             { key: "createdAt", header: "Date", render: (r) => new Date(r.createdAt).toLocaleString() },
-            { key: "student", header: "Student", render: (r) => r.student?.regNo || "-" },
+            { key: "student", header: "Student", render: (r) => r.student?.regNumber || "-" },
             { key: "paymentMode", header: "Payment" },
             { key: "totalAmount", header: "Amount", render: (r) => `Rs ${r.totalAmount}` }
           ]}
@@ -162,7 +162,7 @@ export default function ShopPage() {
           <option value="">Walk-in / No student</option>
           {students.map((s) => (
             <option key={s._id} value={s._id}>
-              {s.regNo} - {s.firstName}
+              {s.regNumber} - {s.firstName}
             </option>
           ))}
         </Select>

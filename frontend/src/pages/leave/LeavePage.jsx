@@ -75,7 +75,7 @@ export default function LeavePage() {
 
       <Table
         columns={[
-          { key: "student", header: "Student", render: (r) => r.student?.regNo || "-" },
+          { key: "student", header: "Student", render: (r) => r.student?.regNumber || "-" },
           { key: "fromDate", header: "From", render: (r) => new Date(r.fromDate).toLocaleDateString() },
           { key: "toDate", header: "To", render: (r) => new Date(r.toDate).toLocaleDateString() },
           { key: "reason", header: "Reason" },
@@ -113,7 +113,7 @@ export default function LeavePage() {
               <option value="">-- select --</option>
               {students.map((s) => (
                 <option key={s._id} value={s._id}>
-                  {s.regNo} - {s.firstName}
+                  {s.regNumber} - {s.firstName}
                 </option>
               ))}
             </Select>

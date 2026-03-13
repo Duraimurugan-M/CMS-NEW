@@ -157,7 +157,7 @@ export default function ReportsPage() {
         <Table
           columns={[
             { key: "invoiceNo", header: "Invoice" },
-            { key: "student", header: "Student", render: (r) => r.student?.regNo || "-" },
+            { key: "student", header: "Student", render: (r) => r.student?.regNumber || "-" },
             { key: "dueDate", header: "Due Date", render: (r) => (r.dueDate ? new Date(r.dueDate).toLocaleDateString() : "-") },
             { key: "totalAmount", header: "Total", render: (r) => `Rs ${r.totalAmount}` },
             { key: "paidAmount", header: "Paid", render: (r) => `Rs ${r.paidAmount}` },

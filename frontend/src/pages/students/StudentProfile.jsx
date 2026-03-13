@@ -36,7 +36,7 @@ export default function StudentProfile() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold text-slate-900">
-            {student.firstName} {student.lastName || ""} ({student.regNo})
+            {student.firstName} {student.lastName || ""} ({student.regNumber})
           </h1>
           <p className="text-xs text-slate-500">
             Course: {student.course?.name || "-"} · Status: {student.status} · Balance: ₹ {balance}

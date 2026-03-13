@@ -243,7 +243,7 @@ export default function FeesPage() {
           <option value="">-- select --</option>
           {students.map((s) => (
             <option key={s._id} value={s._id}>
-              {s.regNo} - {s.firstName}
+              {s.regNumber} - {s.firstName}
             </option>
           ))}
         </Select>

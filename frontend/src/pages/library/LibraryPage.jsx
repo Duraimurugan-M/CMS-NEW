@@ -98,7 +98,7 @@ export default function LibraryPage() {
         <Table
           columns={[
             { key: "book", header: "Book", render: (r) => r.book?.title || "-" },
-            { key: "student", header: "Student", render: (r) => r.student?.regNo || "-" },
+            { key: "student", header: "Student", render: (r) => r.student?.regNumber || "-" },
             { key: "issueDate", header: "Issued", render: (r) => new Date(r.issueDate).toLocaleDateString() },
             { key: "dueDate", header: "Due", render: (r) => new Date(r.dueDate).toLocaleDateString() },
             { key: "returnDate", header: "Returned", render: (r) => (r.returnDate ? new Date(r.returnDate).toLocaleDateString() : "-") },
@@ -159,7 +159,7 @@ export default function LibraryPage() {
           <option value="">-- select --</option>
           {students.map((s) => (
             <option key={s._id} value={s._id}>
-              {s.regNo} - {s.firstName}
+              {s.regNumber} - {s.firstName}
             </option>
           ))}
         </Select>

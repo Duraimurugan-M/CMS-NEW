@@ -159,7 +159,7 @@ export default function UsersPage() {
             <option value="">-- none --</option>
             {students.map((s) => (
               <option key={s._id} value={s._id}>
-                {s.regNo} - {s.firstName} {s.lastName || ""}
+                {s.regNumber} - {s.firstName} {s.lastName || ""}
               </option>
             ))}
           </Select>
@@ -169,7 +169,7 @@ export default function UsersPage() {
             <option value="">-- none --</option>
             {parents.map((p) => (
               <option key={p._id} value={p._id}>
-                {p.name} - {p.student?.regNo || "-"}
+                {p.name} - {p.student?.regNumber || "-"}
               </option>
             ))}
           </Select>

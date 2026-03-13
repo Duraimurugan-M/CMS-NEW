@@ -101,11 +101,11 @@ export default function StudentsList() {
       <Table
         columns={[
           {
-            key: "regNo",
+            key: "regNumber",
             header: "Reg No",
             render: (s) => (
               <Link className="text-primary-600 hover:underline" to={`/students/${s._id}`}>
-                {s.regNo}
+                {s.regNumber}
               </Link>
             )
           },

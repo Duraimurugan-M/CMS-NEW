@@ -5,10 +5,10 @@ import { generateRegistrationNumber } from "../utils/generateRegNumber.js";
 // POST /api/students
 export const createStudent = async (req, res, next) => {
   try {
-    const regNo = await generateRegistrationNumber();
+    const regNumber = await generateRegistrationNumber();
     const student = await Student.create({
       ...req.body,
-      regNo
+      regNumber
     });
 
     // Create empty ledger
@@ -29,7 +29,7 @@ export const getStudents = async (req, res, next) => {
       filter.$or = [
         { firstName: new RegExp(search, "i") },
         { lastName: new RegExp(search, "i") },
-        { regNo: new RegExp(search, "i") }
+        { regNumber: new RegExp(search, "i") }
       ];
     }
     if (course) filter.course = course;

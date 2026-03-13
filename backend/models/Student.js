@@ -13,7 +13,7 @@ const parentContactSchema = new mongoose.Schema(
 
 const studentSchema = new mongoose.Schema(
   {
-    regNo: { type: String, required: true, unique: true },
+    regNumber: { type: String, required: true, unique: true, sparse: true },
     firstName: { type: String, required: true },
     lastName: { type: String },
     gender: { type: String, enum: ["male", "female", "other"] },

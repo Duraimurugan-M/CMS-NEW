@@ -91,7 +91,7 @@ export default function PaymentsPage() {
       <Table
         columns={[
           { key: "createdAt", header: "Date", render: (p) => new Date(p.createdAt).toLocaleString() },
-          { key: "student", header: "Student", render: (p) => p.student?.regNo || p.student?._id || "-" },
+          { key: "student", header: "Student", render: (p) => p.student?.regNumber || p.student?._id || "-" },
           { key: "amount", header: "Amount", render: (p) => `₹ ${p.amount}` },
           { key: "method", header: "Method" },
           { key: "status", header: "Status" },

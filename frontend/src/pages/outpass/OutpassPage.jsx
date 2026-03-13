@@ -75,7 +75,7 @@ export default function OutpassPage() {
 
       <Table
         columns={[
-          { key: "student", header: "Student", render: (r) => r.student?.regNo || "-" },
+          { key: "student", header: "Student", render: (r) => r.student?.regNumber || "-" },
           { key: "exitDateTime", header: "Exit", render: (r) => new Date(r.exitDateTime).toLocaleString() },
           { key: "expectedReturnDateTime", header: "Expected Return", render: (r) => (r.expectedReturnDateTime ? new Date(r.expectedReturnDateTime).toLocaleString() : "-") },
           { key: "reason", header: "Reason" },
@@ -114,7 +114,7 @@ export default function OutpassPage() {
               <option value="">-- select --</option>
               {students.map((s) => (
                 <option key={s._id} value={s._id}>
-                  {s.regNo} - {s.firstName}
+                  {s.regNumber} - {s.firstName}
                 </option>
               ))}
             </Select>
