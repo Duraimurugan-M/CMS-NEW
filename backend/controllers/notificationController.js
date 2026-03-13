@@ -40,3 +40,13 @@ export const markNotificationRead = async (req, res, next) => {
   }
 };
 
+// GET /api/notifications/unread-count
+export const getUnreadCount = async (req, res, next) => {
+  try {
+    const unread = await Notification.countDocuments({ user: req.user._id, isRead: false });
+    res.json({ unread });
+  } catch (err) {
+    next(err);
+  }
+};
+

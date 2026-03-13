@@ -22,6 +22,9 @@ export const getLeaveRequests = async (req, res, next) => {
     const filter = {
       ...parseDateRange(req, "createdAt")
     };
+    if (["parent", "student"].includes(req.user.role)) {
+      filter.requestedBy = req.user._id;
+    }
     if (req.query.status) filter.status = req.query.status;
     if (req.query.student) filter.student = req.query.student;
 

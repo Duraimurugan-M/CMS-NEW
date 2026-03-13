@@ -37,9 +37,17 @@ export default function PaymentsPage() {
       return;
     }
 
-    // Student/parent view: for now show empty until user-student linkage UI is completed
-    setPayments([]);
-    setMeta({ page: 1, totalPages: 1 });
+    // Student/parent view
+    if (user.student) {
+      const res = await api.get(`/payments/student/${user.student}`, {
+        params: { page, limit: 10, from: dateRange.from || undefined, to: dateRange.to || undefined }
+      });
+      setPayments(res.data.items);
+      setMeta({ page: res.data.page, totalPages: res.data.totalPages });
+    } else {
+      setPayments([]);
+      setMeta({ page: 1, totalPages: 1 });
+    }
   };
 
   const downloadReceipt = (p) => {

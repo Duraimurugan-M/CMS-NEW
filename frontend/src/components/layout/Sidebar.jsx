@@ -8,8 +8,13 @@ const menus = {
     { to: "/courses", label: "Courses" },
     { to: "/fees", label: "Fees" },
     { to: "/payments", label: "Payments" },
+    { to: "/expenses", label: "Expenses" },
     { to: "/inventory", label: "Inventory" },
+    { to: "/shop", label: "Shop/Canteen" },
     { to: "/library", label: "Library" },
+    { to: "/leave", label: "Leave" },
+    { to: "/outpass", label: "Outpass" },
+    { to: "/checkin", label: "Check-In" },
     { to: "/reports", label: "Reports" },
     { to: "/circulars", label: "Circulars" },
     { to: "/notifications", label: "Notifications" },
@@ -21,32 +26,48 @@ const menus = {
     { to: "/courses", label: "Courses" },
     { to: "/fees", label: "Fees" },
     { to: "/inventory", label: "Inventory" },
+    { to: "/shop", label: "Shop/Canteen" },
     { to: "/library", label: "Library" },
+    { to: "/leave", label: "Leave" },
+    { to: "/outpass", label: "Outpass" },
+    { to: "/checkin", label: "Check-In" },
+    { to: "/expenses", label: "Expenses" },
     { to: "/reports", label: "Reports" },
     { to: "/circulars", label: "Circulars" },
-    { to: "/notifications", label: "Notifications" }
+    { to: "/notifications", label: "Notifications" },
+    { to: "/settings", label: "Settings" }
   ],
   accountant: [
     { to: "/dashboard", label: "Dashboard" },
     { to: "/students", label: "Students" },
     { to: "/fees", label: "Fees" },
     { to: "/payments", label: "Payments" },
+    { to: "/expenses", label: "Expenses" },
     { to: "/reports", label: "Reports" },
     { to: "/notifications", label: "Notifications" }
   ],
   staff: [
     { to: "/dashboard", label: "Dashboard" },
     { to: "/students", label: "Students" },
+    { to: "/leave", label: "Leave" },
+    { to: "/outpass", label: "Outpass" },
+    { to: "/checkin", label: "Check-In" },
     { to: "/circulars", label: "Circulars" },
     { to: "/notifications", label: "Notifications" }
   ],
   student: [
     { to: "/dashboard", label: "Dashboard" },
+    { to: "/payments", label: "Payments" },
+    { to: "/leave", label: "Leave" },
+    { to: "/outpass", label: "Outpass" },
     { to: "/circulars", label: "Circulars" },
     { to: "/notifications", label: "Notifications" }
   ],
   parent: [
     { to: "/dashboard", label: "Dashboard" },
+    { to: "/payments", label: "Payments" },
+    { to: "/leave", label: "Leave" },
+    { to: "/outpass", label: "Outpass" },
     { to: "/circulars", label: "Circulars" },
     { to: "/notifications", label: "Notifications" }
   ],
@@ -58,14 +79,12 @@ const menus = {
   ],
   shopadmin: [
     { to: "/dashboard", label: "Dashboard" },
-    { to: "/inventory", label: "Inventory" },
-    { to: "/reports", label: "Reports" },
+    { to: "/shop", label: "Shop/Canteen" },
     { to: "/notifications", label: "Notifications" }
   ],
   canteen: [
     { to: "/dashboard", label: "Dashboard" },
-    { to: "/inventory", label: "Inventory" },
-    { to: "/reports", label: "Reports" },
+    { to: "/shop", label: "Shop/Canteen" },
     { to: "/notifications", label: "Notifications" }
   ]
 };
@@ -80,11 +99,11 @@ export default function Sidebar() {
         <h1 className="text-lg font-semibold text-primary-600">College CMS</h1>
         {user && (
           <p className="text-xs text-slate-500 mt-1">
-            {user.name} Â· {user.role}
+            {user.name} · {user.role}
           </p>
         )}
       </div>
-      <nav className="p-3 space-y-1">
+      <nav className="p-3 space-y-1 max-h-[calc(100vh-82px)] overflow-y-auto">
         {items.map((item) => (
           <NavLink
             key={item.to}
@@ -104,4 +123,3 @@ export default function Sidebar() {
     </aside>
   );
 }
-

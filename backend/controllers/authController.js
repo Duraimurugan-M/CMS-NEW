@@ -41,7 +41,9 @@ export const bootstrapSuperadmin = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        student: user.student || null,
+        parent: user.parent || null
       }
     });
   } catch (err) {
@@ -77,7 +79,9 @@ export const login = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        student: user.student || null,
+        parent: user.parent || null
       }
     });
   } catch (err) {

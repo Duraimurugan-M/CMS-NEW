@@ -22,6 +22,12 @@ export const getCirculars = async (req, res, next) => {
     if (audience) {
       filter.audience = { $in: [audience, "all"] };
     }
+    if (req.query.search) {
+      filter.$or = [
+        { title: new RegExp(String(req.query.search), "i") },
+        { content: new RegExp(String(req.query.search), "i") }
+      ];
+    }
 
     const { page, limit, skip } = parsePagination(req);
     const sort = parseSort(req, "-publishDate");
@@ -32,6 +38,34 @@ export const getCirculars = async (req, res, next) => {
     ]);
 
     res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PUT /api/circulars/:id
+export const updateCircular = async (req, res, next) => {
+  try {
+    const circular = await Circular.findByIdAndUpdate(req.params.id, req.body, {
+      new: true
+    });
+    if (!circular) {
+      return res.status(404).json({ message: "Circular not found" });
+    }
+    res.json(circular);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// DELETE /api/circulars/:id
+export const deleteCircular = async (req, res, next) => {
+  try {
+    const circular = await Circular.findByIdAndDelete(req.params.id);
+    if (!circular) {
+      return res.status(404).json({ message: "Circular not found" });
+    }
+    res.json({ message: "Circular deleted" });
   } catch (err) {
     next(err);
   }

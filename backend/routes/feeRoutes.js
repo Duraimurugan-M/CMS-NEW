@@ -1,5 +1,5 @@
 import express from "express";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import {
   createFeeHead,
   getFeeHeads,
@@ -24,12 +24,31 @@ router.post(
 );
 
 router.get("/", getFeeHeads);
-router.put("/:id", authorizeRoles("admin", "superadmin", "accountant"), updateFeeHead);
-router.delete("/:id", authorizeRoles("admin", "superadmin", "accountant"), deleteFeeHead);
+router.put(
+  "/:id",
+  authorizeRoles("admin", "superadmin", "accountant"),
+  [param("id").isMongoId()],
+  validate,
+  updateFeeHead
+);
+router.delete(
+  "/:id",
+  authorizeRoles("admin", "superadmin", "accountant"),
+  [param("id").isMongoId()],
+  validate,
+  deleteFeeHead
+);
 
 router.post(
   "/invoices",
   authorizeRoles("admin", "superadmin", "accountant"),
+  [
+    body("student").isMongoId(),
+    body("lines").isArray({ min: 1 }),
+    body("lines.*.feeHead").isMongoId(),
+    body("lines.*.amount").isFloat({ gt: 0 })
+  ],
+  validate,
   createInvoice
 );
 

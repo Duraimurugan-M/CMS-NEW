@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getFeeReport,
+  getPendingDuesReport,
   getInventoryReport,
   getExpenseReport,
   getCanteenShopReport,
@@ -14,6 +15,11 @@ const router = express.Router();
 router.use(protect);
 
 router.get("/fees", authorizeRoles("admin", "superadmin", "accountant"), getFeeReport);
+router.get(
+  "/pending-dues",
+  authorizeRoles("admin", "superadmin", "accountant"),
+  getPendingDuesReport
+);
 router.get("/inventory", authorizeRoles("admin", "superadmin"), getInventoryReport);
 router.get("/expenses", authorizeRoles("admin", "superadmin", "accountant"), getExpenseReport);
 router.get(

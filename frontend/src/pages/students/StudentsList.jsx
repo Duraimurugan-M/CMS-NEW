@@ -26,7 +26,7 @@ export default function StudentsList() {
 
   useEffect(() => {
     load();
-    api.get("/courses").then((res) => setCourses(res.data));
+    api.get("/courses", { params: { page: 1, limit: 100 } }).then((res) => setCourses(res.data.items || []));
   }, []);
 
   const load = async ({ page = 1 } = {}) => {

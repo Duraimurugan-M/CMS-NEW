@@ -1,5 +1,5 @@
 import express from "express";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import {
   createCourse,
   getCourses,
@@ -23,8 +23,20 @@ router.post(
 );
 
 router.get("/", getCourses);
-router.put("/:id", authorizeRoles("admin", "superadmin"), updateCourse);
-router.delete("/:id", authorizeRoles("admin", "superadmin"), deleteCourse);
+router.put(
+  "/:id",
+  authorizeRoles("admin", "superadmin"),
+  [param("id").isMongoId()],
+  validate,
+  updateCourse
+);
+router.delete(
+  "/:id",
+  authorizeRoles("admin", "superadmin"),
+  [param("id").isMongoId()],
+  validate,
+  deleteCourse
+);
 
 export default router;
 

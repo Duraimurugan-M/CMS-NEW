@@ -21,8 +21,21 @@ export const getShopItems = async (req, res, next) => {
     if (isCanteen !== undefined) {
       filter.isCanteen = isCanteen === "true";
     }
-    const items = await ShopItem.find(filter);
-    res.json(items);
+    if (req.query.search) {
+      filter.$or = [
+        { name: new RegExp(String(req.query.search), "i") },
+        { code: new RegExp(String(req.query.search), "i") }
+      ];
+    }
+
+    const { page, limit, skip } = parsePagination(req);
+    const sort = parseSort(req);
+
+    const [items, total] = await Promise.all([
+      ShopItem.find(filter).sort(sort).skip(skip).limit(limit),
+      ShopItem.countDocuments(filter)
+    ]);
+    res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     next(err);
   }
@@ -37,6 +50,7 @@ export const createSale = async (req, res, next) => {
 
     await session.withTransaction(async () => {
       let totalAmount = 0;
+      const normalizedLines = [];
 
       // Validate stock before deduction
       for (const line of lines) {
@@ -44,28 +58,47 @@ export const createSale = async (req, res, next) => {
         if (!item || !item.isActive) {
           throw new Error("Invalid item in sale");
         }
-        if (item.stock < line.quantity) {
+        const quantity = Number(line.quantity || 0);
+        if (!Number.isFinite(quantity) || quantity <= 0) {
+          const err = new Error(`Invalid quantity for ${item.name}`);
+          err.statusCode = 400;
+          throw err;
+        }
+        if (item.stock < quantity) {
           const err = new Error(`Insufficient stock for ${item.name}`);
           err.statusCode = 400;
           throw err;
         }
-        totalAmount += line.total;
+        const price = Number(line.price ?? item.price);
+        const total = Number((price * quantity).toFixed(2));
+        totalAmount += total;
+        normalizedLines.push({
+          item: item._id,
+          quantity,
+          price,
+          total
+        });
       }
 
       // Deduct stock
-      for (const line of lines) {
-        await ShopItem.findByIdAndUpdate(
-          line.item,
+      for (const line of normalizedLines) {
+        const updated = await ShopItem.findOneAndUpdate(
+          { _id: line.item, stock: { $gte: line.quantity } },
           { $inc: { stock: -line.quantity } },
-          { session }
+          { session, new: true }
         );
+        if (!updated) {
+          const err = new Error("Stock changed during checkout. Please retry.");
+          err.statusCode = 409;
+          throw err;
+        }
       }
 
       const created = await SalesTransaction.create(
         [
           {
             student,
-            lines,
+            lines: normalizedLines,
             totalAmount,
             isCanteen,
             paymentMode,
