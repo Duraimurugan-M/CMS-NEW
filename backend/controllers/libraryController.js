@@ -3,6 +3,7 @@ import BookIssue from "../models/BookIssue.js";
 import dayjs from "dayjs";
 import { getSettings } from "../services/settingService.js";
 import { parsePagination, parseSort } from "../utils/queryUtils.js";
+import { addLedgerEntry } from "../services/ledgerService.js";
 
 // POST /api/library/books
 export const createBook = async (req, res, next) => {
@@ -120,6 +121,15 @@ export const returnBook = async (req, res, next) => {
     const book = await Book.findById(issue.book._id);
     book.availableCopies += 1;
     await book.save();
+
+    if (issue.fineAmount > 0) {
+      await addLedgerEntry({
+        studentId: issue.student,
+        type: "debit",
+        amount: issue.fineAmount,
+        description: `Library fine for delayed return of ${issue.book.title}`
+      });
+    }
 
     res.json(issue);
   } catch (err) {

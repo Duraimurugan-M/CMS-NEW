@@ -6,6 +6,7 @@ import SalesTransaction from "../models/SalesTransaction.js";
 import Book from "../models/Book.js";
 import BookIssue from "../models/BookIssue.js";
 import { parsePagination, parseSort, parseDateRange } from "../utils/queryUtils.js";
+import Student from "../models/Student.js";
 
 // GET /api/reports/fees
 export const getFeeReport = async (req, res, next) => {
@@ -37,9 +38,19 @@ export const getPendingDuesReport = async (req, res, next) => {
   try {
     const filter = {
       ...parseDateRange(req, "dueDate"),
-      status: { $in: ["unpaid", "partially_paid"] }
+      status: req.query.status || { $in: ["unpaid", "partially_paid"] }
     };
     if (req.query.student) filter.student = req.query.student;
+    if (req.query.search) {
+      const matchedStudents = await Student.find({
+        $or: [
+          { regNumber: new RegExp(String(req.query.search), "i") },
+          { firstName: new RegExp(String(req.query.search), "i") },
+          { lastName: new RegExp(String(req.query.search), "i") }
+        ]
+      }).select("_id");
+      filter.student = { $in: matchedStudents.map((student) => student._id) };
+    }
 
     const { page, limit, skip } = parsePagination(req);
     const sort = parseSort(req, "dueDate");

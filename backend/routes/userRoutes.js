@@ -20,11 +20,12 @@ router.post(
   "/",
   [
     body("name").notEmpty(),
-    body("email").isEmail(),
+    body("email").optional({ values: "falsy" }).isEmail(),
     body("password").isLength({ min: 6 }),
     body("role").isIn([
       "superadmin",
       "admin",
+      "admission",
       "accountant",
       "student",
       "parent",

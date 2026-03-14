@@ -1,17 +1,27 @@
 import Payment from "../models/Payment.js";
 import { createRazorpayOrderForInvoice, markPaymentSuccess } from "../services/paymentService.js";
 import { parsePagination, parseSort, parseDateRange } from "../utils/queryUtils.js";
+import { assertStudentAccess, isPrivilegedRole, resolveLinkedStudentId } from "../utils/accessUtils.js";
 
 // POST /api/payments/create
 export const createPaymentOrder = async (req, res, next) => {
   try {
     const { studentId, invoiceId, amount } = req.body;
+    const allowed = await assertStudentAccess({ user: req.user, studentId });
+    if (!allowed) {
+      return res.status(403).json({ message: "Not allowed to create a payment for this student" });
+    }
+
     const { order, payment } = await createRazorpayOrderForInvoice({
       studentId,
       invoiceId,
       amount
     });
-    res.status(201).json({ order, paymentId: payment._id });
+    res.status(201).json({
+      order,
+      paymentId: payment._id,
+      razorpayKey: process.env.RAZORPAY_KEY_ID || ""
+    });
   } catch (err) {
     next(err);
   }
@@ -58,6 +68,11 @@ export const listPayments = async (req, res, next) => {
 // GET /api/payments/student/:id
 export const getStudentPayments = async (req, res, next) => {
   try {
+    const allowed = await assertStudentAccess({ user: req.user, studentId: req.params.id });
+    if (!allowed) {
+      return res.status(403).json({ message: "Not allowed to access these payments" });
+    }
+
     const filter = { student: req.params.id };
     if (req.query.status) filter.status = req.query.status;
     if (req.query.from || req.query.to) {
@@ -74,6 +89,24 @@ export const getStudentPayments = async (req, res, next) => {
       Payment.countDocuments(filter)
     ]);
     res.json({ items, page, limit, total, totalPages: Math.ceil(total / limit) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMyPayments = async (req, res, next) => {
+  try {
+    if (isPrivilegedRole(req.user.role)) {
+      return listPayments(req, res, next);
+    }
+
+    const studentId = await resolveLinkedStudentId(req.user);
+    if (!studentId) {
+      return res.json({ items: [], page: 1, limit: 20, total: 0, totalPages: 0 });
+    }
+
+    req.params.id = studentId;
+    return getStudentPayments(req, res, next);
   } catch (err) {
     next(err);
   }

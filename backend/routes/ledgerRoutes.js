@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.use(protect);
 
-router.get("/:studentId", authorizeRoles("admin", "superadmin", "accountant"), getStudentLedger);
+router.get("/:studentId", authorizeRoles("admin", "superadmin", "accountant", "student", "parent"), getStudentLedger);
 router.post("/entry", authorizeRoles("superadmin", "accountant"), addManualEntry);
 
 export default router;

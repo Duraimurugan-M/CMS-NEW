@@ -15,7 +15,7 @@ router.use(protect);
 
 router.post(
   "/",
-  authorizeRoles("parent", "student"),
+  authorizeRoles("parent"),
   [body("student").optional().isMongoId(), body("exitDateTime").isISO8601(), body("reason").notEmpty()],
   validate,
   createOutpassRequest

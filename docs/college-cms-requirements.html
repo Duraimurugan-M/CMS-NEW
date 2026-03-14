@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>College Management System Requirements</title>
+    <style>
+      :root {
+        --ink: #1f2937;
+        --muted: #6b7280;
+        --line: #d1d5db;
+        --panel: #f8fafc;
+        --accent: #0f766e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Georgia", "Times New Roman", serif;
+        color: var(--ink);
+        background: #e5e7eb;
+        line-height: 1.55;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 12mm auto;
+        background: #fff;
+        padding: 18mm 16mm 18mm;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 8px;
+        line-height: 1.25;
+      }
+
+      h1 {
+        font-size: 28px;
+        color: var(--accent);
+      }
+
+      h2 {
+        font-size: 20px;
+        margin-top: 22px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      h3 {
+        font-size: 16px;
+        margin-top: 16px;
+      }
+
+      p {
+        margin: 8px 0;
+      }
+
+      ul,
+      ol {
+        margin: 8px 0 8px 20px;
+      }
+
+      li {
+        margin: 4px 0;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 16px;
+        margin: 16px 0 18px;
+        padding: 14px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+      }
+
+      .meta div {
+        font-size: 14px;
+      }
+
+      .label {
+        font-weight: 700;
+      }
+
+      .note,
+      .scope {
+        padding: 12px 14px;
+        border-left: 4px solid var(--accent);
+        background: #f0fdfa;
+        margin: 12px 0;
+      }
+
+      .module {
+        margin-top: 18px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .module-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #111827;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel);
+      }
+
+      .small {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .page {
+          margin: 0;
+          width: auto;
+          min-height: auto;
+          box-shadow: none;
+          padding: 12mm;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <h1>College Management System</h1>
+      <p class="small">PDF-Ready Requirements Document</p>
+
+      <div class="meta">
+        <div><span class="label">Document Type:</span> Business Requirements / Functional Requirements</div>
+        <div><span class="label">Project:</span> College Management System (CMS)</div>
+        <div><span class="label">Prepared For:</span> Product, Engineering, Operations, Accounts</div>
+        <div><span class="label">Version:</span> 1.0</div>
+      </div>
+
+      <div class="scope">
+        <p><strong>Purpose.</strong> This document defines the functional requirement scope for a real-world college management system with student lifecycle management, fees and accounts, online payments, communications, hostel-style movement workflows, library, inventory, shop/canteen, and reports.</p>
+      </div>
+
+      <h2>1. Scope Overview</h2>
+      <p>The system shall support the following major business domains:</p>
+      <ul>
+        <li>Master setup and administration</li>
+        <li>Admissions and student registration</li>
+        <li>Student information management</li>
+        <li>Fees, invoices, payments, ledger, and accounts</li>
+        <li>Student and parent portal access</li>
+        <li>Circulars, schedules, notifications, and reminders</li>
+        <li>Leave, outpass, and check-in / check-out workflows</li>
+        <li>Inventory, expenses, library, shop, and canteen operations</li>
+        <li>Reports and audit-supporting outputs</li>
+      </ul>
+
+      <h2>2. Core Business Requirements</h2>
+
+      <section class="module">
+        <div class="module-title">2.1 Master Setup and Administration</div>
+        <ul>
+          <li>Institution profile setup</li>
+          <li>Academic year, semester, and session setup</li>
+          <li>Department, course, class, batch, and section setup</li>
+          <li>User role and permission management</li>
+          <li>Fee head and charge master setup</li>
+          <li>Notification, reminder, and system settings</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.2 Admissions Management</div>
+        <ul>
+          <li>Admission enquiry and application intake</li>
+          <li>Document verification workflow</li>
+          <li>Provisional / temporary admission status</li>
+          <li>Final admission approval workflow</li>
+          <li>Automatic generation of unique registration number at confirmed admission stage</li>
+          <li>Advance payment capture during admission</li>
+          <li>Advance refund / adjustment options</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.3 Student Profile Management</div>
+        <ul>
+          <li>Unique dynamic registration number</li>
+          <li>Personal details: name, gender, date of birth, phone, email, address, status</li>
+          <li>Parent / guardian details</li>
+          <li>Course / class / batch allocation</li>
+          <li>Admission date and student status tracking</li>
+          <li>Document and identity details if required by institution</li>
+          <li>Profile-wise visibility of fees, payment history, invoices, ledger, leave, outpass, and movement records</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.4 Fees Management System</div>
+        <ul>
+          <li>Student-wise fee structure creation</li>
+          <li>Support custom fee heads such as tuition, transport, hostel, exam, and other institution-defined charges</li>
+          <li>Due date setup at invoice or installment level</li>
+          <li>Installment plan definition and tracking</li>
+          <li>Optional fine calculation rules</li>
+          <li>Scholarship, concession, waiver, and discount handling</li>
+          <li>Advance admission payment adjustment into final fee billing</li>
+          <li>Staff fee module excluded from scope</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.5 Invoices, Payments, and Ledger</div>
+        <ul>
+          <li>Invoice creation for regular and advance-linked fee billing</li>
+          <li>Individual ledger for each student</li>
+          <li>Ledger to track billed fees, payments received, pending dues, and adjustments</li>
+          <li>Separate visibility of advance vs regular fee records</li>
+          <li>Payment receipt generation</li>
+          <li>Invoice PDF download</li>
+          <li>Payment status tracking: created, pending, success, failed, reversed if applicable</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.6 Online Payment Integration</div>
+        <ul>
+          <li>Razorpay integration for student fee payments</li>
+          <li>Online payment initiation from student / parent portal</li>
+          <li>Server-side payment verification and auto confirmation</li>
+          <li>Auto update of invoice and student ledger after successful payment</li>
+          <li>Receipt and invoice download support</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.7 Student / Parent Portal</div>
+        <ul>
+          <li>Login using student ID / registration number and phone number with OTP or password</li>
+          <li>Profile access</li>
+          <li>Fee dues and invoices</li>
+          <li>Payment history and ledger</li>
+          <li>Circulars and schedules</li>
+          <li>Leave request status</li>
+          <li>Outpass status</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.8 Circulars and Schedule Management</div>
+        <ul>
+          <li>Admin publishing of circulars, announcements, exam schedules, and event schedules</li>
+          <li>Audience-based visibility for students, parents, and staff</li>
+          <li>Publish date and expiry date control</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.9 SMS, Email, and App Notifications</div>
+        <ul>
+          <li>Fee due reminders</li>
+          <li>Payment confirmations</li>
+          <li>Leave approval / rejection alerts</li>
+          <li>Outpass approval / rejection alerts</li>
+          <li>Check-in / check-out alerts</li>
+          <li>Circular announcements</li>
+          <li>Support delivery through SMS, email, and in-app notifications</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.10 Leave Management</div>
+        <ul>
+          <li>Workflow: Request → Approval / Denial → Status update</li>
+          <li>Request raised by parent</li>
+          <li>Approver actions: approve, deny, remarks</li>
+          <li>History and status tracking per student</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.11 Outpass Management</div>
+        <ul>
+          <li>Request raised by parent</li>
+          <li>Approval by staff or admin</li>
+          <li>Track exit date/time, reason, expected return, actual return, and final status</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.12 Check-In / Check-Out</div>
+        <ul>
+          <li>Movement tracking for hostel or gate use cases</li>
+          <li>Check-in and check-out event logging</li>
+          <li>Parent and staff notifications</li>
+          <li>Use cases include hostel entry/exit and school/college gate pass</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.13 Inventory Management</div>
+        <ul>
+          <li>Academic inventory</li>
+          <li>Hostel inventory</li>
+          <li>General stock inventory</li>
+          <li>Purchase, usage, adjustment, and balance stock tracking</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.14 Expense Management</div>
+        <ul>
+          <li>Institution expense entry</li>
+          <li>Category-wise tracking</li>
+          <li>Linking with accounts ledger or finance records</li>
+          <li>Expense reporting</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.15 Due Date Alerts</div>
+        <ul>
+          <li>Before due date reminders</li>
+          <li>On due date reminders</li>
+          <li>Post-overdue reminders</li>
+          <li>Channels: SMS, email, app notification</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.16 Shop and Canteen Module</div>
+        <ul>
+          <li>Separate login for shop admin and canteen operator</li>
+          <li>Student purchase billing</li>
+          <li>Credit / prepaid / wallet options as per institutional policy</li>
+          <li>Daily sales reporting</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.17 Canteen and Shop Inventory</div>
+        <ul>
+          <li>Item stock management</li>
+          <li>Purchase and sales tracking</li>
+          <li>Automatic stock deduction on billing</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.18 Library Management System</div>
+        <ul>
+          <li>Support one or more libraries, if required</li>
+          <li>Book catalog management</li>
+          <li>Issue / return workflow</li>
+          <li>Fine calculation for overdue returns</li>
+          <li>Optional linkage of fines to student ledger</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.19 Reports and Analytics</div>
+        <ul>
+          <li>Student fee reports</li>
+          <li>Payment reports</li>
+          <li>Pending due reports</li>
+          <li>Inventory reports</li>
+          <li>Expense reports</li>
+          <li>Canteen / shop reports</li>
+          <li>Library reports</li>
+        </ul>
+      </section>
+
+      <section class="module">
+        <div class="module-title">2.20 Common Platform Features</div>
+        <ul>
+          <li>Global filters by date range, class / course, student name / registration number, payment status, due status</li>
+          <li>Search and pagination</li>
+          <li>Role-based access control</li>
+          <li>Audit-ready logs where required</li>
+          <li>Export support for PDF and Excel where applicable</li>
+        </ul>
+      </section>
+
+      <h2>3. Scope Exclusions</h2>
+      <ul>
+        <li>Staff fee processing is out of scope</li>
+        <li>Only student fee processing is in scope</li>
+      </ul>
+
+      <h2>4. Recommended Role Matrix</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Primary Responsibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Superadmin</td>
+            <td>Full platform control, setup, users, settings, audit visibility</td>
+          </tr>
+          <tr>
+            <td>Admin</td>
+            <td>Operational control of students, fees, circulars, reports, approvals</td>
+          </tr>
+          <tr>
+            <td>Admission</td>
+            <td>Admission intake, verification, provisional/final admission processing</td>
+          </tr>
+          <tr>
+            <td>Accountant</td>
+            <td>Fees, invoices, payments, student ledger, reports</td>
+          </tr>
+          <tr>
+            <td>Staff</td>
+            <td>Leave/outpass approval, check-in/out monitoring, student operations</td>
+          </tr>
+          <tr>
+            <td>Librarian</td>
+            <td>Library catalog, issue/return, fine processing</td>
+          </tr>
+          <tr>
+            <td>Student</td>
+            <td>Portal access for profile, invoices, payments, ledger, circulars, status views</td>
+          </tr>
+          <tr>
+            <td>Parent</td>
+            <td>Portal access, payments, leave requests, outpass requests, status tracking</td>
+          </tr>
+          <tr>
+            <td>Shop Admin / Canteen Operator</td>
+            <td>Billing, stock, and daily sales management</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>5. Implementation Priority</h2>
+      <ol>
+        <li>Master setup, admissions, student profile, fees, invoices, ledger, payments</li>
+        <li>Student/parent portal and notifications</li>
+        <li>Leave, outpass, check-in/out workflows</li>
+        <li>Inventory, expense, library, shop/canteen modules</li>
+        <li>Advanced reports, audit support, exports, analytics</li>
+      </ol>
+
+      <div class="note">
+        <p><strong>PDF Export Tip.</strong> Open this file in a browser and use <em>Print → Save as PDF</em>. The layout is designed for A4 export.</p>
+      </div>
+    </main>
+  </body>
+</html>

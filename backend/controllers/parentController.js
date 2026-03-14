@@ -17,7 +17,7 @@ export const listParents = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const [items, total] = await Promise.all([
-      Parent.find(filter).populate("student", "regNo firstName lastName").sort("-createdAt").skip(skip).limit(limit),
+      Parent.find(filter).populate("student", "regNumber firstName lastName").sort("-createdAt").skip(skip).limit(limit),
       Parent.countDocuments(filter)
     ]);
 

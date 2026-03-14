@@ -14,14 +14,19 @@ export const notifyUser = async ({
   message,
   channels = ["in_app"]
 }) => {
-  const notification = await Notification.create({
-    user,
-    student,
-    type,
-    title,
-    message,
-    channel: channels
-  });
+  let notification = null;
+  const userId = user?._id || user;
+
+  if (userId && channels.includes("in_app")) {
+    notification = await Notification.create({
+      user: userId,
+      student,
+      type,
+      title,
+      message,
+      channel: channels
+    });
+  }
 
   if (channels.includes("email") && user?.email) {
     await sendEmail({

@@ -18,7 +18,11 @@ router.use(protect);
 router.post(
   "/",
   authorizeRoles("admin", "superadmin"),
-  [body("firstName").notEmpty(), body("admissionDate").notEmpty()],
+  [
+    body("firstName").notEmpty(),
+    body("admissionDate").notEmpty(),
+    body("statusType").optional().isIn(["temporary", "permanent"]),
+  ],
   validate,
   createStudent
 );
@@ -28,7 +32,10 @@ router.get("/:id", [param("id").isMongoId()], validate, getStudentById);
 router.put(
   "/:id",
   authorizeRoles("admin", "superadmin"),
-  [param("id").isMongoId()],
+  [
+    param("id").isMongoId(),
+    body("statusType").optional().isIn(["temporary", "permanent"]),
+  ],
   validate,
   updateStudent
 );

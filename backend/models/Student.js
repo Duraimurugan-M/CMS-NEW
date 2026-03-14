@@ -24,13 +24,19 @@ const studentSchema = new mongoose.Schema(
     admissionDate: { type: Date, required: true },
     status: {
       type: String,
-      enum: ["active", "inactive", "alumni", "suspended"],
+      enum: ["pending", "active", "inactive", "alumni", "suspended"],
       default: "active"
+    },
+    statusType: {
+      type: String,
+      enum: ["temporary", "permanent"],
+      default: "temporary"
     },
     course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
     batch: { type: String },
     parents: [parentContactSchema],
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    advancePayment: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

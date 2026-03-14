@@ -35,6 +35,7 @@ import reminderRoutes from "./routes/reminderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { startReminderScheduler } from "./services/reminderService.js";
 import parentRoutes from "./routes/parentRoutes.js";
+import admissionRoutes from "./routes/admissionRoutes.js";
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use("/api/settings", settingRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/admissions", admissionRoutes);
 app.use("/api/parents", parentRoutes);
 
 // Error handler

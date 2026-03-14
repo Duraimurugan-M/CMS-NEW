@@ -4,7 +4,8 @@ import {
   createPaymentOrder,
   verifyPayment,
   listPayments,
-  getStudentPayments
+  getStudentPayments,
+  getMyPayments
 } from "../controllers/paymentController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { authorizeRoles } from "../middleware/roleMiddleware.js";
@@ -16,7 +17,7 @@ router.use(protect);
 
 router.post(
   "/create",
-  authorizeRoles("student", "admin", "superadmin", "accountant"),
+  authorizeRoles("student", "parent", "admin", "superadmin", "accountant"),
   [body("studentId").isMongoId(), body("invoiceId").isMongoId(), body("amount").isFloat({ gt: 0 })],
   validate,
   createPaymentOrder
@@ -32,6 +33,7 @@ router.post(
   verifyPayment
 );
 router.get("/", authorizeRoles("admin", "superadmin", "accountant"), listPayments);
+router.get("/mine", authorizeRoles("student", "parent"), getMyPayments);
 router.get("/student/:id", [param("id").isMongoId()], validate, getStudentPayments);
 
 export default router;

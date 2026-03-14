@@ -3,6 +3,8 @@ import { body } from "express-validator";
 import {
   bootstrapSuperadmin,
   login,
+  sendOtp,
+  verifyOtp,
   refresh,
   getProfile,
   logout
@@ -17,7 +19,17 @@ router.post(
   bootstrapSuperadmin
 );
 
-router.post("/login", [body("password").notEmpty()], login);
+router.post(
+  "/login",
+  [body("email").notEmpty().withMessage("Email or phone is required"), body("password").notEmpty()],
+  login
+);
+router.post("/send-otp", [body("regNo").notEmpty()], sendOtp);
+router.post(
+  "/verify-otp",
+  [body("regNo").notEmpty(), body("phone").notEmpty(), body("code").notEmpty()],
+  verifyOtp
+);
 router.post("/refresh", [body("refreshToken").notEmpty()], refresh);
 
 router.get("/profile", protect, getProfile);

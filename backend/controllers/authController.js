@@ -3,6 +3,10 @@ import crypto from "crypto";
 import { validationResult } from "express-validator";
 import User from "../models/User.js";
 import RefreshToken from "../models/RefreshToken.js";
+import Student from "../models/Student.js";
+import OtpCode from "../models/OtpCode.js";
+import { notifyUser } from "../services/notificationService.js";
+import { enrichAuthUser } from "../utils/authPayload.js";
 
 const signAccessToken = (user) => {
   return jwt.sign(
@@ -27,7 +31,7 @@ const signRefreshToken = (user) => {
 
 const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
 
-const buildAuthPayload = async (user) => {
+export const buildAuthPayload = async (user) => {
   const token = signAccessToken(user);
   const refreshToken = signRefreshToken(user);
 
@@ -40,14 +44,7 @@ const buildAuthPayload = async (user) => {
   return {
     token,
     refreshToken,
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      student: user.student || null,
-      parent: user.parent || null
-    }
+    user: await enrichAuthUser(user)
   };
 };
 
@@ -84,9 +81,16 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, phone, password } = req.body;
+    const { email: identifier, password } = req.body;
+    const identifierValue = (identifier || "").trim();
+    if (!identifierValue) {
+      return res.status(400).json({ message: "Email or phone is required" });
+    }
 
-    const query = email ? { email } : { phone };
+    // Allow login using either email or phone (frontend uses a single field for both)
+    const isEmail = /@/.test(identifierValue);
+    const query = isEmail ? { email: identifierValue.toLowerCase() } : { phone: identifierValue };
+
     const user = await User.findOne(query);
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -99,6 +103,107 @@ export const login = async (req, res, next) => {
     const match = await user.matchPassword(password);
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const payload = await buildAuthPayload(user);
+    res.json(payload);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
+
+export const sendOtp = async (req, res, next) => {
+  try {
+    const { regNo, phone } = req.body;
+    if (!regNo) return res.status(400).json({ message: "regNo is required" });
+
+    const student = await Student.findOne({ regNumber: regNo }).populate("user");
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const phoneToUse = phone || student.user?.phone || student.phone;
+    if (!phoneToUse) {
+      return res.status(400).json({ message: "Phone number not available for student" });
+    }
+    if (phone && phone !== phoneToUse) {
+      return res.status(400).json({ message: "Phone number does not match student record" });
+    }
+
+    const code = generateOtp();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    await OtpCode.create({
+      student: student._id,
+      phone: phoneToUse,
+      code,
+      expiresAt
+    });
+
+    // Send OTP (SMS placeholder)
+    if (student.user) {
+      await notifyUser({
+        user: student.user,
+        student: student._id,
+        type: "generic",
+        title: "Your OTP code",
+        message: `Your login OTP is ${code} (valid for 5 minutes)`,
+        channels: ["sms", "in_app"]
+      });
+    } else {
+      // If no user exists, just send SMS placeholder
+      await notifyUser({
+        user: { phone: phoneToUse },
+        student: student._id,
+        type: "generic",
+        title: "Your OTP code",
+        message: `Your login OTP is ${code} (valid for 5 minutes)`,
+        channels: ["sms"]
+      });
+    }
+
+    res.json({ message: "OTP sent" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyOtp = async (req, res, next) => {
+  try {
+    const { regNo, phone, code } = req.body;
+    if (!regNo || !phone || !code) {
+      return res.status(400).json({ message: "regNo, phone and code are required" });
+    }
+
+    const student = await Student.findOne({ regNumber: regNo }).populate("user");
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const otp = await OtpCode.findOne({
+      student: student._id,
+      phone,
+      code,
+      used: false,
+      expiresAt: { $gt: new Date() }
+    }).sort({ createdAt: -1 });
+
+    if (!otp) {
+      return res.status(401).json({ message: "Invalid or expired OTP" });
+    }
+
+    otp.used = true;
+    await otp.save();
+
+    let user = student.user;
+    if (!user) {
+      user = await User.create({
+        name: `${student.firstName} ${student.lastName || ""}`.trim(),
+        phone,
+        role: "student",
+        student: student._id,
+        password: Math.random().toString(36).slice(-8)
+      });
+      student.user = user._id;
+      await student.save();
     }
 
     const payload = await buildAuthPayload(user);
@@ -152,7 +257,7 @@ export const refresh = async (req, res, next) => {
 // GET /api/auth/profile
 export const getProfile = async (req, res, next) => {
   try {
-    res.json(req.user);
+    res.json(await enrichAuthUser(req.user));
   } catch (err) {
     next(err);
   }
